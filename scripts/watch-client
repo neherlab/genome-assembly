@@ -29,7 +29,7 @@ mkdir -p "${WATCH_DIR}/"
 # Watch files with the specified extenstions in the watch directory using
 # `watchexec` and upon changes (new files created or existing files modified)
 # run `rsync` to copy files via SSH to the server.
-"${THIS_DIR}/dependencies/watchexec" \
+"${THIS_DIR}/ignored/watchexec" \
   --notify \
   --watch="${WATCH_DIR}" \
   --shell="bash" \
