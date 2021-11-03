@@ -43,3 +43,60 @@ runs
        ... 
     ...
 ```
+
+
+## Helper scripts
+
+
+### 1. Automatic syncing of files from a client machine (where data is produced) to the server (where data is consumed):
+
+ - On the client machine: open `./scripts/watch-client` and adjust these variables:
+
+    ```bash
+    # Directory to watch. Files That appear in this directory will be sent.
+    WATCH_DIR="/some/absolute/client/path/"
+    # or
+    WATCH_DIR="${THIS_DIR}/../some/relative/client/path/"
+
+    # Username on the server. The SSH session will be established for this user.
+    SERVER_USERNAME="ubuntu"
+
+    # Directory on the server to which the files will be placed
+    SERVER_DIR="/home/${SERVER_USERNAME}/files"
+
+    # Server IP address or hostname
+    SERVER_ADDRESS="18.158.45.194"
+    ```
+
+ - On the client machine: send SSH key to the server, so that SSH sessions could be established without password
+
+    ```bash
+    ssh-copy-id username@12.34.56.78
+    ```
+
+ - On the client machine: Run `./scripts/watch-client`
+
+ - On the server machine: list files on the server by issuing an ls command every 0.5 seconds:
+
+    ```bash
+    watch -ctn 0.5 -- ls -alhR /the/server/directory
+    ```
+
+ - On the client machine: Go to watch directory (defined as `${WATCH_DIR}`) and make a 0-size file:
+
+    ```bash
+    touch empty.txt
+    ```
+
+ - On the server machine: Note that the file appeared on the server and is listed by the `ls` command, having size 0
+
+ - On the client machine: Go to watch directory (defined as `${WATCH_DIR}`) and make a 0-size file:
+
+    ```bash
+    fallocate -l 1G files/aaa/11.txt
+    ```
+
+- On the server machine: Note that the file appeared on the server, and is listed by the `ls` command, has a random suffix in the filename and with size growing until filly downloaded. After that the file is renamed to the original name.
+
+
+

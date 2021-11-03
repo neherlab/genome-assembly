@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#
+# Client script that watches files in a directory and sends newly created
+# and updated files to the server.
+#
+
+set -euo pipefail
+
+# Directory where this script resides.
+THIS_DIR=$(dirname "$(readlink -f "$0")")
+
+bash "${THIS_DIR}/install-dependencies"
+
+# Directory to watch. Files That appear in this directory will be sent.
+WATCH_DIR="${THIS_DIR}/../files/"
+
+# Username on the server. The SSH session will be established for this user.
+SERVER_USERNAME="ubuntu"
+
+# Server directory to which the files will be placed
+SERVER_DIR="/home/${SERVER_USERNAME}/files"
+
+# Server IP address or hostname
+SERVER_ADDRESS="18.158.45.194"
+
+# Create watch directory if not already exist
+mkdir -p "${WATCH_DIR}/"
+
+# Watch files with the specified extenstions in the watch directory using
+# `watchexec` and upon changes (new files created or existing files modified)
+# run `rsync` to copy files via SSH to the server.
+"${THIS_DIR}/dependencies/watchexec" \
+  --notify \
+  --watch="${WATCH_DIR}" \
+  --shell="bash" \
+  --restart \
+  -- \
+  rsync --out-format="%n" \
+  --archive \
+  --recursive \
+  --compress \
+  --no-owner \
+  --no-group \
+  --exclude="./" \
+  "${WATCH_DIR}/" \
+  ${SERVER_USERNAME}@${SERVER_ADDRESS}:${SERVER_DIR}
