@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# Server script that watches files in a directory and runs a command to
+# transform files
+
+set -euo pipefail
+
+# Directory where this script resides.
+THIS_DIR=$(dirname "$(readlink -f "$0")")
+
+bash "${THIS_DIR}/install-dependencies"
+
+# Directory to watch. Files That appear in this directory will be sent.
+WATCH_DIR="${THIS_DIR}/../files/"
+
+# Create watch directory if not already exist
+mkdir -p "${WATCH_DIR}/"
+
+# Watch files with the specified extenstions in the watch directory using
+# `watchexec` and upon changes (new files created or existing files modified)
+# run a command.
+# Here the command is a bash script that prints variables provided by the
+# `watchexec`. These variables tell which files were modified and how.
+# This can be used to run a transformato script on these.
+"${THIS_DIR}/ignored/watchexec" \
+  --notify \
+  --watch="${WATCH_DIR}" \
+  --shell="bash" \
+  --restart \
+  -- \
+  bash -c '\
+    echo "updated: ${WATCHEXEC_CREATED_PATH}"
+    echo "removed: ${WATCHEXEC_REMOVED_PATH}"
+    echo "renamed: ${WATCHEXEC_RENAMED_PATH}"
+    echo "modified: ${WATCHEXEC_WRITTEN_PATH}"
+    echo "metadata changed: ${WATCHEXEC_META_CHANGED_PATH}"
+    echo "mutiple files changed under this common path: ${WATCHEXEC_COMMON_PATH}"
+  '
