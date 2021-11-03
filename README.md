@@ -96,7 +96,17 @@ runs
     fallocate -l 1G files/aaa/11.txt
     ```
 
-- On the server machine: Note that the file appeared on the server, and is listed by the `ls` command, has a random suffix in the filename and with size growing until filly downloaded. After that the file is renamed to the original name.
+ - On the server machine: Note that the file appeared on the server, and is listed by the `ls` command, has a random suffix in the filename and with size growing until filly downloaded. After that the file is renamed to the original name.
 
 
+### 2. Watch files in a directory (on server machine) and run a command when a file changes:
 
+ - Modify `${WATCH_DIR}` in `./scripts/watch-server` to point to the directory that should be watched
+
+ - On the server machine: Run `./scripts/watch-server`
+
+ - On the server machine: Go to watch directory (defined as `${WATCH_DIR}` in the script) and create some files with `touch` and `fallocate` as described above.
+
+ - Note that these modifications are printed by the `./scripts/watch-server`  script.
+
+ - Modify the bash command at the bottom of the `./scripts/watch-server` to run any required command instead of (ar additional to) `echo` and using the variables provided by `watchexec`, e.g. `./my-awesome-command --input=${WATCHEXEC_CREATED_PATH}"`. The newly created files should now trigger that command and the  `${WATCHEXEC_CREATED_PATH}` will be substituted by the path of the created file.
