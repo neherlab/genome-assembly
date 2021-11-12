@@ -5,7 +5,7 @@ params.run = 'test'
 params.input_dir = file("runs/${params.run}/input")
 params.basecall_dir = file("runs/${params.run}/basecalled")
 
-params.guppy_bin = '/home/marco/ownCloud/neherlab/code/genome-assembly/ont-guppy-cpu/bin/guppy_basecaller'
+params.guppy_bin = "$baseDir/ont-guppy-cpu/bin/guppy_basecaller"
 params.flowcell = 'FLO-MIN106'
 params.kit = 'SQK-LSK109'
 
@@ -16,45 +16,41 @@ if ( ! params.basecall_dir.exists() ) {
 
 
 // channel for already loaded fast5 files
-fast5_loaded = Channel.fromPath("${params.input_dir}/barcode*/*fast5.xz")
+fast5_loaded = Channel.fromPath("${params.input_dir}/*.fast5")
 // watcher channel for incoming fast5. Terminates when 'end-signal.fast5.xz' file is created
-fast5_watcher = Channel.watchPath("${params.input_dir}/barcode*/*.fast5.xz")
-                        .until { it.name ==~ /end-signal.fast5.xz/ }
+fast5_watcher = Channel.watchPath("${params.input_dir}/*.fast5")
+                        .until { it.name ==~ /end-signal.fast5/ }
 
 // combine the two fast5 channels
-fast5_all = fast5_loaded.concat(fast5_watcher)
+fast5_ch = fast5_loaded.concat(fast5_watcher)
 
-
-// retrieve both file name and barcode path. e.g:
-// [/home/.../b.fast5.xz, b, barcode22]
-fast5_ch = fast5_all.map { x -> tuple(
-                                x,
-                                x.getSimpleName(),
-                                x.getParent().getName())
-                         }
 
 process basecall {
 
-    publishDir params.basecall_dir, mode: 'move',
-        saveAs: { "${params.basecall_dir}/${bcode}/${it}" }
+    // publishDir params.basecall_dir, mode: 'move',
+    //     saveAs: { "${params.basecall_dir}/${bcode}/${it}" }
 
     input:
-        set file(fast5_file), fname, bcode from fast5_ch
+        path fast5_file from fast5_ch
 
     output:
-        file "${fname}.fastq.xz" into fastq_ch
+        path "**/*.fastq.gz" into fastq_ch
+        val "${fast5_file.getSimpleName()}" into fastq_sourcename
 
     script:
-    """
-    xz -dkc $fast5_file > ${fname}.fast5
-    echo ${fname}.fast5 | \
+        """
         ${params.guppy_bin} \
-        --compress_fastq \
-        -s . \
-        --flowcell ${params.flowcell} --kit ${params.kit}
-    rm ${fname}.fast5
-    """
+            -i . \
+            --barcode_kits EXP-NBD114 EXP-NBD104 \
+            --compress_fastq \
+            -s . \
+            --disable_pings \
+            --nested_output_folder \
+            --trim_barcodes \
+            --flowcell ${params.flowcell} --kit ${params.kit}
+        """
 
 }
 
-// fast5_split.view()
+fastq_ch.view()
+fastq_sourcename.view()
