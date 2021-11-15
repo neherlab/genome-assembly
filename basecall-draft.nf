@@ -1,28 +1,41 @@
 #!/usr/bin/env nextflow
 
+
+// --------- parameter definitions --------- 
+
 // run for which the pipeline should be executed
 params.run = 'test'
+
+// guppy setup
+params.guppy_bin = "$baseDir/ont-guppy-cpu/bin/guppy_basecaller" // binaries for guppy
+params.flowcell = 'FLO-MIN106'
+params.kit = 'SQK-LSK109'
+params.barcode_kits = 'EXP-NBD114 EXP-NBD104'
+
+// watch for incoming files
+params.set_watcher = true
+
+
+// --------- workflow --------- 
+
+// defines directories for input data and to output basecalled data
 params.input_dir = file("runs/${params.run}/input")
 params.basecall_dir = file("runs/${params.run}/basecalled")
 
-params.guppy_bin = "$baseDir/ont-guppy-cpu/bin/guppy_basecaller"
-params.flowcell = 'FLO-MIN106'
-params.kit = 'SQK-LSK109'
-
-// create basecall directory if not existing
+// create output directory if not existing
 if ( ! params.basecall_dir.exists() ) {
     params.basecall_dir.mkdirs()
 }
 
-
 // channel for already loaded fast5 files
 fast5_loaded = Channel.fromPath("${params.input_dir}/*.fast5")
-// watcher channel for incoming fast5. Terminates when 'end-signal.fast5.xz' file is created
-fast5_watcher = Channel.watchPath("${params.input_dir}/*.fast5")
-                        .until { it.name ==~ /end-signal.fast5/ }
-
-// for debug purpose, do not activate watcher
-// fast5_watcher = Channel.empty()
+if ( params.set_watcher ) {
+    // watcher channel for incoming `.fast5` files.
+    // Terminates when `end-signal.fast5.xz` file is created.
+    fast5_watcher = Channel.watchPath("${params.input_dir}/*.fast5")
+                            .until { it.name ==~ /end-signal.fast5/ }
+}
+else { fast5_watcher = Channel.empty() }
 
 
 // combine the two fast5 channels
@@ -43,15 +56,18 @@ process basecall {
 
     script:
         """
+
+        ${params.use_gpu} && module load cuda
+
         ${params.guppy_bin} \
             -i . \
-            --barcode_kits EXP-NBD114 EXP-NBD104 \
-            --compress_fastq \
             -s . \
+            --barcode_kits ${params.barcode_kits} \
+            --flowcell ${params.flowcell} --kit ${params.kit} \
+            --compress_fastq \
             --disable_pings \
             --nested_output_folder \
             --trim_barcodes \
-            --flowcell ${params.flowcell} --kit ${params.kit}
         """
 
 }
@@ -72,6 +88,7 @@ fastq_barcode_ch = fastq_ch.flatten()
 process concatenate_and_compress {
 
     publishDir params.basecall_dir, mode: 'move'
+    // storeDir params.basecall_dir
 
     input:
         tuple val(barcode), file('reads_*.fastq.gz') from fastq_barcode_ch
