@@ -1,4 +1,7 @@
 .nextflow*
 work
-ont-guppy-cpu
+guppy
 runs/test/basecalled
+reports
+upload.sh
+download.sh

@@ -7,7 +7,6 @@
 params.run = 'test'
 
 // guppy setup
-params.guppy_bin = "$baseDir/ont-guppy-cpu/bin/guppy_basecaller" // binaries for guppy
 params.flowcell = 'FLO-MIN106'
 params.kit = 'SQK-LSK109'
 params.barcode_kits = 'EXP-NBD114 EXP-NBD104'
@@ -17,6 +16,14 @@ params.set_watcher = true
 
 
 // --------- workflow --------- 
+
+// guppy binaries
+if (params.use_gpu) {
+    params.guppy_bin = "$baseDir/guppy/guppy-gpu/bin/guppy_basecaller"
+    // params.guppy_bin = "$baseDir/guppy/guppy-cuda/bin/guppy_basecaller"
+} else {
+    params.guppy_bin = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
+}
 
 // defines directories for input data and to output basecalled data
 params.input_dir = file("runs/${params.run}/input")
@@ -52,13 +59,12 @@ process basecall {
         path fast5_file from fast5_ch
 
     output:
-        path "**/barcode*/*.fastq.gz" into fastq_ch
+        path "**/fastq_pass/barcode*/*.fastq.gz" into fastq_ch
+
+    beforeScript "${params.use_gpu} && module purge && module load CUDA"
 
     script:
         """
-
-        ${params.use_gpu} && module load cuda
-
         ${params.guppy_bin} \
             -i . \
             -s . \
