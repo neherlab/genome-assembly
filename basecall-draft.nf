@@ -28,9 +28,6 @@ if (params.use_gpu) {
 // defines directories for input data and to output basecalled data
 params.input_dir = file("runs/${params.run}/input")
 params.basecall_dir = file("runs/${params.run}/basecalled")
-if ( ! params.basecall_dir.exists() ) {
-    params.basecall_dir.mkdirs()
-}
 
 // channel for already loaded fast5 files
 fast5_loaded = Channel.fromPath("${params.input_dir}/*.fast5")
@@ -97,11 +94,11 @@ process concatenate_and_compress {
         tuple val(barcode), file('reads_*.fastq.gz') from fastq_barcode_ch
 
     output:
-        file "${barcode}.fastq.xz"
+        file "${barcode}.fastq.gz"
 
     script:
     """
-    # decompress with gzip, concatenate and compress with xz
-    gzip -dc reads_*.fastq.gz | xz > ${barcode}.fastq.xz
+    # decompress with gzip, concatenate and compress with gz
+    gzip -dc reads_*.fastq.gz | gzip > ${barcode}.fastq.gz
     """
 }
