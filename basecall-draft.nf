@@ -28,17 +28,16 @@ if (params.use_gpu) {
 // defines directories for input data and to output basecalled data
 params.input_dir = file("runs/${params.run}/input")
 params.basecall_dir = file("runs/${params.run}/basecalled")
-
-// create output directory if not existing
 if ( ! params.basecall_dir.exists() ) {
     params.basecall_dir.mkdirs()
 }
 
 // channel for already loaded fast5 files
 fast5_loaded = Channel.fromPath("${params.input_dir}/*.fast5")
+
+// watcher channel for incoming `.fast5` files.
+// Terminates when `end-signal.fast5.xz` file is created.
 if ( params.set_watcher ) {
-    // watcher channel for incoming `.fast5` files.
-    // Terminates when `end-signal.fast5.xz` file is created.
     fast5_watcher = Channel.watchPath("${params.input_dir}/*.fast5")
                             .until { it.name ==~ /end-signal.fast5/ }
 }
@@ -61,7 +60,7 @@ process basecall {
     output:
         path "**/fastq_pass/barcode*/*.fastq.gz" into fastq_ch
 
-    beforeScript "${params.use_gpu} && module purge && module load CUDA"
+    // beforeScript "${params.use_gpu} && module purge && module load CUDA"
 
     script:
         """
@@ -81,9 +80,7 @@ process basecall {
 // Group results by barcode using the name of the parent
 // folder in which files are stored (created by guppy)
 fastq_barcode_ch = fastq_ch.flatten()
-                    .map {
-                        x -> [x.getParent().getName(), x]
-                    }
+                    .map { x -> [x.getParent().getName(), x] }
                     .groupTuple()
 
 // This process takes as input a tuple composed of a barcode
