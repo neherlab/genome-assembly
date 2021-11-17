@@ -9,10 +9,14 @@ params.run = 'test'
 // guppy setup
 params.flowcell = 'FLO-MIN106'
 params.kit = 'SQK-LSK109'
-params.barcode_kits = 'EXP-NBD114 EXP-NBD104'
+params.barcode_kits = '"EXP-NBD114 EXP-NBD104"'
 
 // watch for incoming files
 params.set_watcher = true
+
+// defines directories for input data and to output basecalled data
+params.input_dir = file("runs/${params.run}/input")
+params.basecall_dir = file("runs/${params.run}/basecalled")
 
 
 // --------- workflow --------- 
@@ -25,9 +29,6 @@ if (params.use_gpu) {
     params.guppy_bin = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
 }
 
-// defines directories for input data and to output basecalled data
-params.input_dir = file("runs/${params.run}/input")
-params.basecall_dir = file("runs/${params.run}/basecalled")
 
 // channel for already loaded fast5 files
 fast5_loaded = Channel.fromPath("${params.input_dir}/*.fast5")
@@ -48,19 +49,20 @@ fast5_ch = fast5_loaded.concat(fast5_watcher)
 // Process that for any input fast5 file uses guppy
 // to perform basecalling and barcoding. The output
 // channel collects a list of files in the form
-// .../barcodeXX/filename.fastq.gz
+// .../(barcodeXX|unclassified)/filename.fastq.gz
 process basecall {
 
     input:
         path fast5_file from fast5_ch
 
     output:
-        path "**/fastq_pass/barcode*/*.fastq.gz" into fastq_ch
+        path "**/fastq_pass/*/*.fastq.gz" optional true into fastq_ch
 
-    // beforeScript "${params.use_gpu} && module purge && module load CUDA"
 
     script:
         """
+        # ${params.use_gpu} && module purge && module load CUDA
+
         ${params.guppy_bin} \
             -i . \
             -s . \
@@ -83,12 +85,11 @@ fastq_barcode_ch = fastq_ch.flatten()
 // This process takes as input a tuple composed of a barcode
 // and a list of fastq.gz files corresponding to that barcode.
 // It decompresses and concatenates these files, returning
-// a unique compressed filename that is named `barcodeXX.fastq.xz`,
+// a unique compressed filename that is named `barcodeXX.fastq.gz`,
 // where `XX` is the barcode number
 process concatenate_and_compress {
 
     publishDir params.basecall_dir, mode: 'move'
-    // storeDir params.basecall_dir
 
     input:
         tuple val(barcode), file('reads_*.fastq.gz') from fastq_barcode_ch
