@@ -24,6 +24,7 @@ netflow run basecall-draft.nf \
     -resume \ # to resume execution from last run
     -profile cpu \ # either cpu / gpu / local . The first two are for SLURM runs.
     -run 2021-11-17_test \ # name of the sub-folder in which files are stored
+    -live_stats true \ # whether to produce live stats in a .csv file
 ```
 
 This command will also automatically produce a report of the run in the `reports` folder
