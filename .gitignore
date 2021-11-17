@@ -5,3 +5,5 @@ runs/test/*
 reports
 upload.sh
 download.sh
+/scripts/ignored/
+/files

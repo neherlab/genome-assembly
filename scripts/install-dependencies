@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+# Installs dependencies:
+#
+#  1. watchexec
+#     https://watchexec.github.io/
+#
+
+set -euo pipefail
+
+# Directory where this script resides.
+THIS_DIR=$(dirname "$(readlink -f "$0")")
+
+# Directory where to put the `watchexec` executable
+DST_DIR="${THIS_DIR}/ignored"
+
+WATCHEXEC_VERSION="1.17.1"
+WATCHEXEC_URL="https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl.tar.xz"
+
+# Create destination directory if not exists
+mkdir -p "${DST_DIR}"
+
+if [ ! -f "${DST_DIR}/watchexec" ]; then
+  echo "Installing watchexec"
+
+  # Download and extract `watchexec` executable into the destination directory
+  curl -fsSL "${WATCHEXEC_URL}" |
+    tar -C "${DST_DIR}" -xJ --strip-components=1 "watchexec-1.17.1-x86_64-unknown-linux-musl/watchexec"
+fi
