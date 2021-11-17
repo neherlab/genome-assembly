@@ -20,12 +20,13 @@ The test dataset for basecalling was created by subsampling `.fast5` files from 
 
 ```bash
 netflow run basecall-draft.nf \
-    --set_watcher false \ # to avoid activating the watcher
+    --set_watcher false \ # to avoid activating the input-files watcher
     -resume \ # to resume execution from last run
     -profile cpu \ # either cpu / gpu / local . The first two are for SLURM runs.
+    -run 2021-11-17_test \ # name of the sub-folder in which files are stored
 ```
 
-This will produce a report of the run in the `reports` folder
+This command will also automatically produce a report of the run in the `reports` folder
 
 ### Genome Assembly
 
