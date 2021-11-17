@@ -27,7 +27,9 @@ netflow run basecall-draft.nf \
     -live_stats true \ # whether to produce live stats in a .csv file
 ```
 
-This command will also automatically produce a report of the run in the `reports` folder
+This command will also automatically produce a report of the run in the `reports` folder.
+The path of guppy binaries for cpu and gpu can be specified with `--guppy_bin_cpu` and `--guppy_bin_gpu`.
+Other options that can be specified include `--flowcell`, `--kit` and `--barcode_kits`.
 
 ### Genome Assembly
 

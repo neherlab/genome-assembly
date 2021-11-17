@@ -22,16 +22,15 @@ params.basecall_dir = file("runs/${params.run}/basecalled")
 // that gets updated online
 params.live_stats = false
 
+// path of guppy binaries (cpu or gpu)
+params.guppy_bin_cpu = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
+params.guppy_bin_gpu = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
+
+
 // --------- workflow --------- 
 
 // guppy binaries
-if (params.use_gpu) {
-    params.guppy_bin = "$baseDir/guppy/guppy-gpu/bin/guppy_basecaller"
-    // params.guppy_bin = "$baseDir/guppy/guppy-cuda/bin/guppy_basecaller"
-} else {
-    params.guppy_bin = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
-}
-
+params.guppy_bin = params.use_gpu ? params.guppy_bin_gpu : params.guppy_bin_cpu
 
 // channel for already loaded fast5 files
 fast5_loaded = Channel.fromPath("${params.input_dir}/*.fast5")
@@ -106,7 +105,7 @@ process concatenate_and_compress {
     script:
     """
     # decompress with gzip, concatenate and compress with gz
-    gzip -dc reads_*.fastq.gz | gzip > ${barcode}.fastq.gz
+    gzip -dc reads_*.fastq.gz | gzip -c > ${barcode}.fastq.gz
     """
 }
 
@@ -145,6 +144,7 @@ process basecalling_live_report {
         """
 }
 
+// Collect all stats file in a single final .csv file.
 collect_bc_stats.collectFile(
     name: 'bc_stats.csv',
     skip: 1,
