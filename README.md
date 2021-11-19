@@ -18,11 +18,14 @@ The test dataset for basecalling was created by subsampling `.fast5` files from 
 
 #### Basecalling command
 
+Example of pipeline execution command and options
+
 ```bash
 netflow run basecall-draft.nf \
     --set_watcher false \ # to avoid activating the input-files watcher
     -resume \ # to resume execution from last run
-    -profile cpu \ # either cpu / gpu / local . The first two are for SLURM runs.
+    -profile cluster \ # either cluster or standard.
+    --use_gpu false \ # whether to use gpu for basecalling
     -run 2021-11-17_test \ # name of the sub-folder in which files are stored
     -live_stats true \ # whether to produce live stats in a .csv file
 ```

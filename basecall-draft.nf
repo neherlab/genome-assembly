@@ -22,6 +22,9 @@ params.basecall_dir = file("runs/${params.run}/basecalled")
 // that gets updated online
 params.live_stats = false
 
+// whether to use gpu
+params.use_gpu = false
+
 // path of guppy binaries (cpu or gpu)
 params.guppy_bin_cpu = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
 params.guppy_bin_gpu = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
@@ -47,12 +50,13 @@ else { fast5_watcher = Channel.empty() }
 // combine the two fast5 channels
 fast5_ch = fast5_loaded.concat(fast5_watcher)
 
-
 // Process that for any input fast5 file uses guppy
 // to perform basecalling and barcoding. The output
 // channel collects a list of files in the form
 // .../(barcodeXX|unclassified)/filename.fastq.gz
 process basecall {
+
+    label params.use_gpu ? 'gpu_q6h' : 'q6h'
 
     input:
         path fast5_file from fast5_ch
@@ -94,6 +98,8 @@ fastq_barcode_ch = fastq_ch.flatten()
 // where `XX` is the barcode number
 process concatenate_and_compress {
 
+    label 'q6h'
+
     publishDir params.basecall_dir, mode: 'move'
 
     input:
@@ -117,12 +123,14 @@ if ( (! params.bcstats_dir.exists()) & params.live_stats ) {
 }
 
 // channels that taps into fastq files channel, collate 100 files
-fq_tap_ch = fastq_tap_ch.collate(100)
+fq_tap_ch = fastq_tap_ch.collate(50)
 
 // creates a csv file with read leanght, barcode and timestamp
 // the file gets appended live and also collected in an output channel
 // NB: needs python's pandas and Biopython in the environment 
 process basecalling_live_report {
+
+    label 'q30m'
 
     input:
         file('reads_*.fastq.gz') from fq_tap_ch
