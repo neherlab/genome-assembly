@@ -1,8 +1,8 @@
-.nextflow*
-work
-guppy
-runs/test/*
-reports
+/.nextflow*
+/work
+/guppy
+/runs/*
+/reports
 /scripts/ignored/
 /files
 /scripts/miniasm_and_minipolish.sh

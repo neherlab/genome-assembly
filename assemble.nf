@@ -7,7 +7,7 @@ params.run = "test"
 params.input_dir = file("runs/${params.run}/basecalled")
 
 // number of threads for the jobs
-params.n_threads = 8
+params.n_threads = 16
 
 // output directory in which trycycler clusters are saved for further inspection
 params.trycyler_dir = file("runs/${params.run}/clustering")
@@ -86,7 +86,7 @@ toassemble_ch = subsampled_ch
 // assemble with flye
 process assemble_flye {
 
-    label 'q6h'
+    label 'q30m'
 
     input:
         tuple val(barcode), val(sample_num), file(fq) from toassemble_ch.flye
@@ -105,7 +105,7 @@ process assemble_flye {
 // assemble with raven
 process assemble_raven {
 
-    label 'q6h'
+    label 'q30m'
 
     input:
         tuple val(barcode), val(sample_num), file(fq) from toassemble_ch.raven
@@ -124,7 +124,7 @@ process assemble_raven {
 // assemble with minipolish
 process assemble_mini {
 
-    label 'q6h'
+    label 'q30m'
 
     input:
         tuple val(barcode), val(sample_num), file(fq) from toassemble_ch.mini
@@ -152,7 +152,7 @@ assembled_ch = flye_out.mix(raven_out, mini_out).groupTuple(size: 12).join(to_cl
 // for further inspection.
 process trycycler_cluster {
 
-    label 'q6h'
+    label 'q30m'
 
     publishDir params.trycyler_dir, mode: 'move'
 
