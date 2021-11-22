@@ -141,7 +141,7 @@ process basecalling_live_report {
     when:
         params.live_stats
 
-    conda 'bioconda:biopython pandas'
+    conda 'bioconda::biopython pandas'
 
     script:
         """
