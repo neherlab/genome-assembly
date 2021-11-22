@@ -25,21 +25,49 @@ process filtlong {
 process subsampler {
 
     label 'q30m'
+    echo true
 
     input:
         tuple val (bc), file ("reads.fastq") from fastq_filtered_ch
 
 
     output:
-        file("${bc}/sample_*.fastq") into subsampled_ch
+        file("${bc}/sample_*.fastq") optional true into subsampled_ch
 
     script:
         """
-        trycycler subsample --reads reads.fastq --out_dir ${bc}
+        trycycler subsample --reads reads.fastq --out_dir ${bc} --min_read_depth 1
         """
 }
 
-subsampled_ch.view { $it }
 
+assembly_ch = subsampled_ch.flatten().branch {
+    flye_ch : it.getSimpleName().find("[0-9]{2}").toInteger() <= 4
+    raven_ch : it.getSimpleName().find("[0-9]{2}").toInteger() >= 9
+    mini_ch : true 
+}
 
+process ass_flye {
 
+    input:
+        file fq from assembly_ch.flye_ch
+
+    output:
+        val ("${fq.getParent()}") into assembled_ch
+
+    script:
+    // barcode = fq.getParent().getSimpleName()
+    """
+    """
+
+}
+
+// process ass_raven {
+    
+// }
+
+// process ass_mini {
+    
+// }
+
+assembled_ch.view()
