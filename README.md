@@ -136,3 +136,19 @@ runs
  - Note that these modifications are printed by the `./scripts/watch-server`  script.
 
  - Modify the bash command at the bottom of the `./scripts/watch-server` to run any required command instead of (ar additional to) `echo` and using the variables provided by `watchexec`, e.g. `./my-awesome-command --input=${WATCHEXEC_CREATED_PATH}"`. The newly created files should now trigger that command and the  `${WATCHEXEC_CREATED_PATH}` will be substituted by the path of the created file.
+
+
+## Dependencies
+
+List of dependencies used in the pipeline so far:
+
+- `nextflow`
+- `raven`
+- [Miniasm+Minipolish](https://github.com/rrwick/Minipolish)
+- `flye`
+- `trycycler`
+- `any2fasta`
+- `filtlong`
+- `guppy`
+
+TODO: add tools to automatically install dependencies (e.g. conda environments within nextflow).
