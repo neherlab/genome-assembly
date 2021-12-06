@@ -82,11 +82,62 @@ mv trycycler/cluster_003 trycycler/bad_cluster_003
 # Flips contigs which are pointing in the wrong direction, sequences are aligned to achive circularization, overlapping bases are trimmed, or missing ones added at the ends.
 # Tries to make everything fit together
 # Done for each cluster
+# If any of the sequences have a pairwise global alignment percent identity of less than this (default = 98), then the contigs will fail the final check
 
 
-trycycler reconcile --reads reads.fastq.gz --cluster_dir trycycler/cluster_001
+trycycler reconcile --reads reads.fastq --cluster_dir trycycler/cluster_001
 
 # Again remove bad contigs by renaming them
 
 mv trycycler/cluster_001/1_contigs/F_utg000001c.fasta trycycler/cluster_001/1_contigs/F_utg000001c.fasta.bad
 
+# Use dotplot to compare contigs visually:
+
+trycycler dotplot --cluster_dir trycycler/cluster_002
+
+# You should aim to have around four to eight contigs left after running Trycycler reconcile
+# More than nine contigs are not adding much more additional value
+
+# Multiple sequence alignments per cluster
+# Should be hands of, takes a few minutes
+
+trycycler msa --cluster_dir trycycler/cluster_001
+
+# Partition the sequences for each cluster
+
+trycycler partition --reads reads.fastq --cluster_dirs trycycler/cluster_001 trycycler/cluster_002 trycycler/cluster_003
+
+# (The consensus step will take the msa and partition data and build a consensus sequence)
+
+# Trycycler now builds a consensus sequence for each cluster:
+
+trycycler consensus --cluster_dir trycycler/cluster_001
+
+# Concatinate the final consensus sequences into one file
+
+cat trycycler/cluster_*/7_final_consensus.fasta > assembly.fasta
+
+# Polishing step with Medeka (For long reads) (conda install -c bioconda medaka)
+# Requires python 3.6 to 3.7
+# Unsure of wich model -m to use, used standard suggestion given by: medaka tools list\_models
+
+for c in trycycler/cluster_*; do
+    medaka_consensus -i "$c"/4_reads.fastq -d "$c"/7_final_consensus.fasta -o "$c"/medaka -m r941_min_high_g360 -t 12
+    mv "$c"/medaka/consensus.fasta "$c"/8_medaka.fasta
+    rm -r "$c"/medaka "$c"/*.fai "$c"/*.mmi  # clean up
+done
+
+
+# Same as above just for one cluster (VIP install medaka via pip install since the version on conda is not up to date)
+medaka_consensus -i /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/4_reads.fastq -d /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/7_final_consensus.fasta -o /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/medaka -m r941_min_sup_g507 -t 16;
+mv /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/medaka/consensus.fasta /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/8_medaka.fasta
+rm -r /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/medaka /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/*.fai /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/*.mmi
+
+
+# Prokka annotate genome:
+
+prokka --outdir /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/mydir --prefix mygenome /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/8_medaka.fasta
+
+# Visualize genome with artemis
+
+art /home/reto/2021_project_folder/2021_trycycler_assembly/2021_11_23_Microbiome_Alex2/clustering/barcode01/cluster_001/mydir/mygenome.gff
