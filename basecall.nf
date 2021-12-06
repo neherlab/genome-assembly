@@ -82,12 +82,10 @@ process basecall {
 
 }
 
-fastq_tap_ch = Channel.create()
-
 // Group results by barcode using the name of the parent
 // folder in which files are stored (created by guppy)
 fastq_barcode_ch = fastq_ch.flatten()
-                    .tap ( fastq_tap_ch )
+                    .tap { fastq_tap_ch }
                     .map { x -> [x.getParent().getName(), x] }
                     .groupTuple()
 
@@ -115,15 +113,21 @@ process concatenate_and_compress {
     """
 }
 
-
-// define and create directory to store live statistics on the basecalling
+// directory to store live statistics on the basecalling
 params.bcstats_dir = file("runs/${params.run}/basecalling_stats")
-if ( (! params.bcstats_dir.exists()) & params.live_stats ) {
+
+// if live_stats is set to true
+if (params.live_stats) {
+    // create directory
     params.bcstats_dir.mkdirs()
+    // create csv stats file and write header
+    bc_stats_file = file("${params.bcstats_dir}/bc_stats.csv")
+    bc_stats_file.text = 'len, barcode, time\n'
 }
 
-// channels that taps into fastq files channel, collate 100 files
-fq_tap_ch = fastq_tap_ch.collate(50)
+// Stats input channel
+bc_stats_in_ch = Channel.fromPath("${params.bcstats_dir}/bc_stats.csv").first()
+
 
 // creates a csv file with read leanght, barcode and timestamp
 // the file gets appended live and also collected in an output channel
@@ -133,29 +137,17 @@ process basecalling_live_report {
     label 'q30m'
 
     input:
-        file('reads_*.fastq.gz') from fq_tap_ch
-
-    output:
-        file('basecalling_stats.csv') into collect_bc_stats
+        file('reads_*.fastq.gz') from fastq_tap_ch.collate(50)
+        file('bc_stats.csv') from bc_stats_in_ch
 
     when:
         params.live_stats
-
-    conda 'bioconda::biopython pandas'
 
     script:
         """
         gzip -dc reads_*.fastq.gz > reads.fastq
         python3 $baseDir/scripts/basecall_stats.py reads.fastq
-        tail -n +2 basecalling_stats.csv >> ${params.bcstats_dir}/temp_${workflow.start}_${workflow.runName}_bc_stats.csv
+        tail -n +2 basecalling_stats.csv >> bc_stats.csv
         rm reads.fastq
         """
 }
-
-// Collect all stats file in a single final .csv file.
-collect_bc_stats.collectFile(
-    name: 'bc_stats.csv',
-    skip: 1,
-    keepHeader: true,
-    storeDir: params.bcstats_dir,
-)
