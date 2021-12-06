@@ -125,13 +125,11 @@ if (params.live_stats) {
     bc_stats_file.text = 'len, barcode, time\n'
 }
 
-// Stats input channel
+// Stats input channel: value channel with one file
 bc_stats_in_ch = Channel.fromPath("${params.bcstats_dir}/bc_stats.csv").first()
 
-
-// creates a csv file with read leanght, barcode and timestamp
-// the file gets appended live and also collected in an output channel
-// NB: needs python's pandas and Biopython in the environment 
+// creates a csv file with read length, barcode and timestamp
+// content of the file get appended to the file "basecalling_stats/bc_stats.csv"
 process basecalling_live_report {
 
     label 'q30m'
