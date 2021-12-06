@@ -11,6 +11,7 @@ dependencies:
   - any2fasta=0.4.2=1
   - binutils_impl_linux-64=2.35.1=h27ae35d_9
   - binutils_linux-64=2.35=h67ddf6f_30
+  - biopython=1.79=py39h3811e60_1
   - brotli=1.0.9=h7f98852_6
   - brotli-bin=1.0.9=h7f98852_6
   - bwidget=1.9.14=ha770c72_1
@@ -108,7 +109,6 @@ dependencies:
   - matplotlib-base=3.5.0=py39h2fa2bec_0
   - miniasm=0.3_r179=h5bf99c6_2
   - minimap2=2.23=h5bf99c6_0
-  - minipolish=0.1.2=py_0
   - munkres=1.1.4=pyh9f0ad1d_0
   - muscle=3.8.1551=h7d875b9_6
   - mysql-common=8.0.27=ha770c72_1
@@ -129,9 +129,7 @@ dependencies:
   - pcre2=10.37=h032f7d1_0
   - perl=5.32.1=1_h7f98852_perl5
   - pillow=8.4.0=py39ha612740_0
-  - pip=21.2.4=py39h06a4308_0
-  - pip:
-    - git+https://github.com/rrwick/Minipolish.git
+  - pip=21.3.1=pyhd8ed1ab_0
   - pixman=0.40.0=h36c2ea0_0
   - pthread-stubs=0.4=h36c2ea0_1001
   - pyparsing=3.0.6=pyhd8ed1ab_0
@@ -194,3 +192,5 @@ dependencies:
   - xz=5.2.5=h7b6447c_0
   - zlib=1.2.11=h36c2ea0_1013
   - zstd=1.5.0=ha95c52a_0
+  - pip:
+    - git+https://github.com/rrwick/Minipolish.git
