@@ -126,6 +126,8 @@ process assemble_mini {
 
     label 'q30m'
 
+    errorStrategy 'ignore'
+
     input:
         tuple val(barcode), val(sample_num), file(fq) from toassemble_ch.mini
 

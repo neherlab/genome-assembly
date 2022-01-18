@@ -122,7 +122,7 @@ if (params.live_stats) {
     params.bcstats_dir.mkdirs()
     // create csv stats file and write header
     bc_stats_file = file("${params.bcstats_dir}/bc_stats.csv")
-    bc_stats_file.text = 'len, barcode, time\n'
+    bc_stats_file.text = 'len,barcode,time\n'
 }
 
 // Stats input channel: value channel with one file
