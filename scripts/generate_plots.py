@@ -5,6 +5,14 @@ import numpy as np
 import argparse
 import pathlib
 
+
+def selective_show(b):
+    if b:
+        plt.show()
+    else:
+        plt.close()
+
+
 if __name__ == "__main__":
 
     # parse arguments
@@ -27,6 +35,11 @@ if __name__ == "__main__":
         type=int,
         help="Threshold number of reads to exclude barcodes in some plots",
         default=1000,
+    )
+    parser.add_argument(
+        "--display",
+        help="if specified figures are displayed when created.",
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -68,7 +81,7 @@ if __name__ == "__main__":
     plt.xlabel("read length (bp)")
     plt.tight_layout()
     plt.savefig(sv_fld / "len_cdf.png", facecolor="w", dpi=200)
-    plt.show()
+    selective_show(args.display)
 
     # number of reads by barcode
     sns.histplot(data=df, x="barcode")
@@ -79,7 +92,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.tight_layout()
     plt.savefig(sv_fld / "n_reads.png", facecolor="w", dpi=200)
-    plt.show()
+    selective_show(args.display)
 
     # total read length by barcode
     sns.histplot(data=df, x="barcode", weights="len")
@@ -88,7 +101,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.tight_layout()
     plt.savefig(sv_fld / "tot_length.png", facecolor="w", dpi=200)
-    plt.show()
+    selective_show(args.display)
 
     # read length distribution by barcode
     sns.boxplot(data=df[mask], x="barcode", y="len", order=selected_bc)
@@ -97,4 +110,4 @@ if __name__ == "__main__":
     plt.ylabel("read length distribution")
     plt.tight_layout()
     plt.savefig(sv_fld / "read_length_distr.png", facecolor="w", dpi=200)
-    plt.show()
+    selective_show(args.display)
