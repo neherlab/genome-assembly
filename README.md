@@ -70,6 +70,38 @@ runs
     ...
 ```
 
+### Visualizing basecalling statistics
+
+The script `basecall_stats.py` can be used to generate figures to analyze general basecalling statistics, such as read length distribution and number of reads. Usage is as follows:
+
+```
+usage: generate_plots.py [-h] [--dest DEST] [--thr THR] stats_file
+
+produce figures to analyze sequencing statistics
+
+positional arguments:
+  stats_file   The csv file containing the basecalling statistics.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --dest DEST  Destination folder in which to save figures
+  --thr THR    Threshold number of reads to exclude barcodes in some plots
+(base) marco@molari-thinkpad:~/ownCloud/neherlab/code/genome-assembly$ mkdir test
+(base) marco@molari-thinkpad:~/ownCloud/neherlab/code/genome-assembly$ python3 scripts/generate_plots.py --help
+usage: generate_plots.py [-h] [--dest DEST] [--thr THR] [--display] stats_file
+
+produce figures to analyze sequencing statistics
+
+positional arguments:
+  stats_file   The csv file containing the basecalling statistics.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --dest DEST  Destination folder in which to save figures
+  --thr THR    Threshold number of reads to exclude barcodes in some plots
+  --display    if specified figures are displayed when created.
+```
+
 
 ## Helper scripts
 
