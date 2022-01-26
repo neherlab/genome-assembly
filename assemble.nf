@@ -170,5 +170,7 @@ process trycycler_cluster {
             --reads reads.fastq \
             --assemblies assemblies_*.fasta \
             --out_dir $barcode
+
+        cp reads.fastq $barcode/filtlong_reads.fastq
         """
 }
