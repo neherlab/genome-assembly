@@ -5,10 +5,6 @@ params.run = "test"
 // directory containing the basecalled reads
 params.input_dir = file("runs/${params.run}/clustering")
 
-// number of threads for the jobs
-params.n_threads = 16
-
-
 // ------- capture and setup input -------
 
 // capture barcode folders
