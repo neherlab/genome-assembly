@@ -42,7 +42,7 @@ The `trycycle reconcile` step is executed by the `reconcile.nf` workflow. This w
 This command should be run multiple times with the `-resume` option, correcting every time the content of the clusters that failed to reconcile, until all clusters are successfully reconciled.
 
 ```bash
-nextflow reconcile.nf 
+nextflow run reconcile.nf 
   -profile cluster \ # either cluster or standard.
   --run test # name of the run
   -resume \ # to resume execution from last run
