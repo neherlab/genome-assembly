@@ -23,10 +23,16 @@ cluster_ch = barcodes_ch
         file("$it/cluster_*", type: 'dir')
            ]}
     .transpose()
-
+    .map {[ 
+        it[0],
+        it[2].getSimpleName(),
+        it[1],
+        file("${it[2]}/*_contigs", type: 'dir')
+        ]}
 
 // ------- workflow -------
 
+// PROCESS -> reconcile
 // - performs trycycle reconcile
 // - produces and stores a reconcile_log.txt file, which contains the output of reconcile command.
 //   This can be used to take decisions on which contigs to remove.
@@ -37,12 +43,12 @@ process reconcile {
 
     label 'q30m'
 
-    publishDir "$params.input_dir/$bc/${cl_dir.getSimpleName()}",
+    publishDir "$params.input_dir/$bc/$cl",
         mode: 'copy',
         pattern: '{reconcile_log.txt,2_all_seqs.fasta}'
 
     input:
-        tuple val(bc), file(reads), file(cl_dir) from cluster_ch
+        tuple val(bc), val(cl), file(reads), file(cl_dirs) from cluster_ch
 
     output:
         path("reconcile_log.txt")
@@ -52,18 +58,22 @@ process reconcile {
 
     script:
         """
+        # prepare cluster directory, put contigs inside
+        mkdir $cl
+        mv *_contigs $cl
+
         # run trycycle reconcile. Save stout and stderr to file. Escape possible errors
-        trycycler reconcile --reads $reads --cluster_dir $cl_dir > reconcile_log.txt 2>&1 \
+        trycycler reconcile --reads $reads --cluster_dir $cl > reconcile_log.txt 2>&1 \
         || echo process failed >> reconcile_log.txt
 
         # append to file the tag of barcode and cluster
-        echo $bc ${cl_dir.getSimpleName()} >> reconcile_log.txt
+        echo $bc $cl >> reconcile_log.txt
 
         # write on file whether reconcile was successful. If so, move generated file
         # to main directory for capture
-        if [ -f $cl_dir/2_all_seqs.fasta ]; then
+        if [ -f $cl/2_all_seqs.fasta ]; then
             echo reconcile success >> reconcile_log.txt
-            mv $cl_dir/2_all_seqs.fasta 2_all_seqs.fasta
+            mv $cl/2_all_seqs.fasta 2_all_seqs.fasta
         else
             echo reconcile failure >> reconcile_log.txt
         fi
