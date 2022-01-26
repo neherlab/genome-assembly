@@ -28,11 +28,25 @@ netflow run basecall-draft.nf \
     --use_gpu false \ # whether to use gpu for basecalling
     --run 2021-11-17_test \ # name of the sub-folder in which files are stored
     --live_stats true \ # whether to produce live stats in a .csv file
+    --run test # name of the run
 ```
 
 This command will also automatically produce a report of the run in the `reports` folder.
 The path of guppy binaries for cpu and gpu can be specified with `--guppy_bin_cpu` and `--guppy_bin_gpu`.
 Other options that can be specified include `--flowcell`, `--kit` and `--barcode_kits`.
+
+### Reconcile
+
+The `trycycle reconcile` step is executed by the `reconcile.nf` workflow. This workflow tries to reconcile in parallel al clusters for all barcodes. It produces a `reconcile_log.txt` file for each cluster, with the output of the command. This file can be used to correct the dataset and possibly remove some contigs. It also produces a `reconcile_summary.txt` file in the `clustering` folder, with a summary of which clusters have been successfully reconciled.
+
+This command should be run multiple times with the `-resume` option, correcting every time the content of the clusters that failed to reconcile, until all clusters are successfully reconciled.
+
+```bash
+nextflow reconcile.nf 
+  -profile cluster \ # either cluster or standard.
+  --run test # name of the run
+  -resume \ # to resume execution from last run
+```
 
 ### Genome Assembly
 

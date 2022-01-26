@@ -35,6 +35,8 @@ cluster_ch = barcodes_ch
 //   in the main directory, to have a summary of which contigs failed to reconcile.
 process reconcile {
 
+    label 'q30m'
+
     publishDir "$params.input_dir/$bc/${cl_dir.getSimpleName()}",
         mode: 'copy',
         pattern: '{reconcile_log.txt,2_all_seqs.fasta}'
