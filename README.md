@@ -100,15 +100,9 @@ nextflow run consensus.nf \
    -resume
 ```
 
-### Genome Assembly
+## Folder structure
 
-The automatization should include filtering reads by length, subsampling reads, and running the different assemblers suggested in the trycycle guide.
-
-At this point we should add a script that should recapitulate the data and produce information on the quality of contigs. The user can then decide which contigs should be submitted for the last processing step, which consists in reconciliation with trycycle.
-
-### Folder structure
-
-This is the general idea for the directory structure of the project
+This is the general idea for the directory structure of the project. Before running the first workflow (or while running it if `set_watcher` is set to true) data should be placed inside the `run_name/input` folder.
 
 ```
 runs
@@ -117,11 +111,11 @@ runs
             001.fast5
             002.fast5
             ...
-        basecalled # after basecalling (fastq.gz)
+        basecalled # basecalled data (fastq.gz)
             barcode_12.gz
             barcode_13.gz
             ...
-        clustering # after assembling
+        clustering # further processing
     run_2
        input
        basecalled
