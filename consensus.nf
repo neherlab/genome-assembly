@@ -129,7 +129,7 @@ process polish {
 
     script:
         """
-        medaka_consensus -i 4_reads.fastq -d 7_final_consensus.fasta -o medaka -m r941_min_sup_g507 -t 12
+        medaka_consensus -i 4_reads.fastq -d 7_final_consensus.fasta -o medaka -m r941_min_sup_g507 -t 8
         mv medaka/consensus.fasta 8_medaka.fasta
         rm -r medaka
         """
