@@ -1,6 +1,14 @@
-# Bacterial genome assembly pipeline written in Nextflow
+# Bacterial genome assembly pipeline
+
+This repo contains a set of [Nextflow](https://www.nextflow.io/) workflows to automatize basecalling and assembling bacterial genomes from Nanopore sequencing. It is based on [trycycler](https://github.com/rrwick/Trycycler). This is currently a work in progress.
 
 ## Pipeline structure
+
+The pipeline is divided in different steps, each one corresponding to a different Nextflow workflow. The ones developed so far are, in order:
+
+- basecalling
+- assembling
+- reconcile
 
 ### Basecalling
 
@@ -26,14 +34,46 @@ netflow run basecall-draft.nf \
     -resume \ # to resume execution from last run
     -profile cluster \ # either cluster or standard.
     --use_gpu false \ # whether to use gpu for basecalling
-    --run 2021-11-17_test \ # name of the sub-folder in which files are stored
+    --run test_run \ # name of the sub-folder in which files are stored
     --live_stats true \ # whether to produce live stats in a .csv file
-    --run test # name of the run
+    --guppy_bin_cpu my_guppy_location/guppy_basecaller \ # location of guppy basecaller binaries
 ```
 
 This command will also automatically produce a report of the run in the `reports` folder.
 The path of guppy binaries for cpu and gpu can be specified with `--guppy_bin_cpu` and `--guppy_bin_gpu`.
 Other options that can be specified include `--flowcell`, `--kit` and `--barcode_kits`.
+
+#### Visualizing basecalling statistics
+
+The script `basecall_stats.py` can be used to generate figures to analyze general basecalling statistics, such as read length distribution and number of reads. Usage is as follows:
+
+```
+usage: generate_plots.py [-h] [--dest DEST] [--thr THR] [--display] stats_file
+
+produce figures to analyze sequencing statistics
+
+positional arguments:
+  stats_file   The csv file containing the basecalling statistics.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --dest DEST  Destination folder in which to save figures
+  --thr THR    Threshold number of reads to exclude barcodes in some plots
+  --display    if specified figures are displayed when created.
+```
+
+### Assemble
+
+The `assemble` workflow takes care of assembling genomes following trycyler's procedure. It can be run with: 
+
+```bash
+nextflow run assemble.nf \
+  -profile cluster \
+  --run test_run \
+  -resume
+```
+
+As for basecalling, the `-profile` option can be set to either `cluster` or `standard`, the latter is for a local execution.
 
 ### Reconcile
 
@@ -42,10 +82,10 @@ The `trycycle reconcile` step is executed by the `reconcile.nf` workflow. This w
 This command should be run multiple times with the `-resume` option, correcting every time the content of the clusters that failed to reconcile, until all clusters are successfully reconciled.
 
 ```bash
-nextflow run reconcile.nf 
-  -profile cluster \ # either cluster or standard.
-  --run test # name of the run
-  -resume \ # to resume execution from last run
+nextflow run reconcile.nf \
+  -profile cluster \
+  --run test_run \
+  -resume
 ```
 
 ### Genome Assembly
@@ -69,53 +109,13 @@ runs
             barcode_12.gz
             barcode_13.gz
             ...
-        concatenated # filtering out short reads and concatenating
-            ...
-        subsampled # trycycle subsample
-            ...
-        assemblies # three different assemblers
-            ...
-        output # trycicle reconciliation
-        
+        clustering # after assembling
     run_2
        input
        basecalled
        ... 
     ...
 ```
-
-### Visualizing basecalling statistics
-
-The script `basecall_stats.py` can be used to generate figures to analyze general basecalling statistics, such as read length distribution and number of reads. Usage is as follows:
-
-```
-usage: generate_plots.py [-h] [--dest DEST] [--thr THR] stats_file
-
-produce figures to analyze sequencing statistics
-
-positional arguments:
-  stats_file   The csv file containing the basecalling statistics.
-
-optional arguments:
-  -h, --help   show this help message and exit
-  --dest DEST  Destination folder in which to save figures
-  --thr THR    Threshold number of reads to exclude barcodes in some plots
-(base) marco@molari-thinkpad:~/ownCloud/neherlab/code/genome-assembly$ mkdir test
-(base) marco@molari-thinkpad:~/ownCloud/neherlab/code/genome-assembly$ python3 scripts/generate_plots.py --help
-usage: generate_plots.py [-h] [--dest DEST] [--thr THR] [--display] stats_file
-
-produce figures to analyze sequencing statistics
-
-positional arguments:
-  stats_file   The csv file containing the basecalling statistics.
-
-optional arguments:
-  -h, --help   show this help message and exit
-  --dest DEST  Destination folder in which to save figures
-  --thr THR    Threshold number of reads to exclude barcodes in some plots
-  --display    if specified figures are displayed when created.
-```
-
 
 ## Helper scripts
 
@@ -189,10 +189,10 @@ optional arguments:
 List of dependencies used in the pipeline so far:
 
 - `nextflow`
+- `trycycler`
 - `raven`
 - [Miniasm+Minipolish](https://github.com/rrwick/Minipolish)
 - `flye`
-- `trycycler`
 - `any2fasta`
 - `filtlong`
 - `guppy`
