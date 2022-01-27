@@ -179,6 +179,6 @@ process prokka {
 
     script:
     """
-    prokka --outdir prokka_$bc --prefix $bc_genome medaka_consensus.fasta
+    prokka --outdir prokka_$bc --prefix ${bc}_genome medaka_consensus.fasta
     """
 }
