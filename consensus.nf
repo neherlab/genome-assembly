@@ -12,7 +12,11 @@ params.input_dir = file("runs/${params.run}/clustering")
 // capture barcode folders
 barcodes_ch = Channel.fromPath("${params.input_dir}/barcode*", type: 'dir')
 
-// separate into barcode label, filtlong reads and cluster folder
+// performs three different operations:
+// - captures barcode, filtlong_reads.fastq and list of clusters.
+// - transposes, to have one item per cluster with assigned barcode
+// - captures the label of destination folder barcodeXX/cluster_XXX,
+//     the filtlong_reads.fastq file and the 2_all_seqs.fasta file.
 cluster_ch = barcodes_ch
     .map { [
         it.getSimpleName(), 
@@ -27,6 +31,8 @@ cluster_ch = barcodes_ch
         ]}
     .into { remove_reads; partition_in}
 
+// create two channels with just label and 2_all_seqs.fasta
+// for msa and consensus.
 remove_reads
     .map { [it[0], it[2]] }
     .into { msa_in; pre_consensus}
@@ -73,9 +79,12 @@ process partition {
         """
 }
 
-// combine three channels, for files 2,3,4
+// duplicate for use in consensus and medaka
+partition_out.into { partout_1; partout_2}
 
-consensus_input = pre_consensus.join(msa_out).join(partition_out)
+// combine three channels, for files 2,3,4
+// to be used as input of consensus
+consensus_in = pre_consensus.join(msa_out).join(partout_1)
 
 process consensus {
 
@@ -86,7 +95,7 @@ process consensus {
         pattern : "7_final_consensus.fasta"
 
     input:
-        tuple val(code), "2_all_seqs.fasta", "3_msa.fasta", "4_reads.fastq" from consensus_input
+        tuple val(code), "2_all_seqs.fasta", "3_msa.fasta", "4_reads.fastq" from consensus_in
 
     output:
         tuple val(code), file("7_final_consensus.fasta") into consensus_out
@@ -98,27 +107,78 @@ process consensus {
 
 }
 
-// TODO: install medaka
-// https://github.com/rrwick/Trycycler/wiki/Polishing-after-Trycycler
-// process polish {
+// join 7_final_consensus and 4_reads in a single channel
+medaka_in = consensus_out.join(partout_2)
 
-//     label 'q30m'
+// polish using medaka. Creates a 8_medaka.fasta file
+process polish {
 
-//     publishDir "$params.input_dir/$code",
-//         mode : 'copy'
+    label 'q30m'
 
-//     input:
+    conda 'conda_envs/medaka_env.yml'
 
+    publishDir "$params.input_dir/$code",
+        mode : 'copy',
+        pattern : "8_medaka.fasta"
 
-//     output:
-//         file("7_final_consensus.fasta")
-//         file("8_medaka.fasta")
+    input:
+        tuple val(code), "4_reads.fastq", "7_final_consensus.fasta" from medaka_in
 
-//     script:
-//         """
-//         medaka_consensus -i 4_reads.fastq -d 7_final_consensus.fasta -o medaka -m r941_min_sup_g507 -t 12
-//         mv medaka/consensus.fasta 8_medaka.fasta
-//         rm -r medaka *.fai *.mmi
-//         """
+    output:
+        tuple val(code), file("8_medaka.fasta") into medaka_out
 
-// }
+    script:
+        """
+        medaka_consensus -i 4_reads.fastq -d 7_final_consensus.fasta -o medaka -m r941_min_sup_g507 -t 12
+        mv medaka/consensus.fasta 8_medaka.fasta
+        rm -r medaka
+        """
+
+}
+
+// groups medaka files by barcode
+concatenate_in = medaka_out.map{[
+        "${it[0]}".split('/')[0],
+        it[1]
+    ]}
+    .groupTuple()
+
+// concatenates all medakafiles with the same barcode
+process concatenate {
+
+    label 'q30m'
+
+    input:
+        tuple val(bc), file("medaka_*.fasta") from concatenate_in
+
+    output:
+        tuple val(bc), file("consensus.fasta") into prokka_in
+
+    script:
+    """
+    cat medaka_*.fasta > medaka_consensus.fasta
+    """
+
+}
+
+// executes prokka on the set of all medaka consensus for one barcode.
+process prokka {
+
+    label 'q30m'
+
+    conda 'conda_envs/prokka_env.yml'
+
+    publishDir "$params.input_dir/$bc",
+        mode : 'copy'
+
+    input:
+        tuple val(bc), file("medaka_consensus.fasta") from prokka_in
+
+    output:
+        file("prokka_$bc", type: 'dir')
+
+    script:
+    """
+    prokka --outdir prokka_$bc --prefix $bc_genome medaka_consensus.fasta
+    """
+}
