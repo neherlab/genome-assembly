@@ -113,7 +113,7 @@ medaka_in = consensus_out.join(partout_2)
 // polish using medaka. Creates a 8_medaka.fasta file
 process polish {
 
-    label 'q30m'
+    label 'q6h'
 
     conda 'conda_envs/medaka_env.yml'
 
@@ -175,7 +175,7 @@ process prokka {
         tuple val(bc), file("medaka_consensus.fasta") from prokka_in
 
     output:
-        file("prokka_$bc", type: 'dir')
+        path("prokka_$bc", type: 'dir')
 
     script:
     """
