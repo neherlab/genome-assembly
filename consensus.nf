@@ -164,7 +164,7 @@ process concatenate {
 // executes prokka on the set of all medaka consensus for one barcode.
 process prokka {
 
-    label 'q30m'
+    label 'q6h'
 
     conda 'conda_envs/prokka_env.yml'
 
