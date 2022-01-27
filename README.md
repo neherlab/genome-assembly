@@ -31,17 +31,25 @@ Example of pipeline execution command and options
 
 ```bash
 netflow run basecall-draft.nf \
-    --set_watcher false \ # to avoid activating the input-files watcher
-    -resume \ # to resume execution from last run
-    -profile cluster \ # either cluster or standard.
-    --use_gpu false \ # whether to use gpu for basecalling
-    --run test_run \ # name of the sub-folder in which files are stored
-    --live_stats true \ # whether to produce live stats in a .csv file
-    --guppy_bin_cpu my_guppy_location/guppy_basecaller \ # location of guppy basecaller binaries
+    -resume \
+    -profile cluster \
+    --set_watcher false \
+    --use_gpu false \
+    --run test_run \
+    --live_stats true \
+    --guppy_bin_cpu my_guppy_location/guppy_basecaller
 ```
 
-This command will also automatically produce a report of the run in the `reports` folder.
-The path of guppy binaries for cpu and gpu can be specified with `--guppy_bin_cpu` and `--guppy_bin_gpu`.
+The options have the following meaning:
+
+- `-resume`: to optionally resume execution if it was stopped.
+- `-profile cluster`: either cluster or standard, depending on whether execution should happen locally or in SLURM jobs.
+- `--set_watcher false`: if true then new files that are uploaded in the `input` folder during execution are also processed. In this case the watcher is stopped when a mock file named `end-signal.fast5` is created in the folder. This is necessary to continue with the next steps of the process, for which all files are required.
+- `--use_gpu false`: whether to proceed to perform basecalling on cpu or gpu. For gpu execution the location of the binary must be specified with `--guppy_bin_gpu path_to_binary/guppy_basecaller`.
+- `--run test_run`: the name of the run. This corresponds to the name of the sub-folder in the `runs` folder, which contains the data in a further `input` folder (see below for folder structure).
+- `--live_stats true`: whether to produce a `bc_stats.csv` file containing stats on length and barcode of the reads produced so far.
+- `--guppy_bin_cpu my_guppy_location/guppy_basecaller`: location of the binaries for guppy.
+
 Other options that can be specified include `--flowcell`, `--kit` and `--barcode_kits`.
 
 #### Visualizing basecalling statistics
