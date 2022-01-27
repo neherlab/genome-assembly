@@ -152,7 +152,7 @@ process concatenate {
         tuple val(bc), file("medaka_*.fasta") from concatenate_in
 
     output:
-        tuple val(bc), file("consensus.fasta") into prokka_in
+        tuple val(bc), file("medaka_consensus.fasta") into prokka_in
 
     script:
     """
