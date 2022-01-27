@@ -1,6 +1,6 @@
 # Bacterial genome assembly pipeline
 
-This repo contains a set of [Nextflow](https://www.nextflow.io/) workflows to automatize basecalling and assembling bacterial genomes from Nanopore sequencing. It is based on [trycycler](https://github.com/rrwick/Trycycler). This is currently a work in progress.
+This repo contains a set of [Nextflow](https://www.nextflow.io/) workflows to automatize basecalling and assembling bacterial genomes from Nanopore sequencing. It can be run in parallel for different barcodes, and uses the SLURM protocol to dispatch jobs on a cluster. It is based on [trycycler](https://github.com/rrwick/Trycycler). This is currently a work in progress.
 
 ## Pipeline structure
 
@@ -9,6 +9,7 @@ The pipeline is divided in different steps, each one corresponding to a differen
 - basecalling
 - assembling
 - reconcile
+- consensus
 
 ### Basecalling
 
@@ -86,6 +87,17 @@ nextflow run reconcile.nf \
   -profile cluster \
   --run test_run \
   -resume
+```
+
+### Consensus
+
+The workflow `consensus.nf` takes care of building a consensus read. It also polisheds the genome using `medaka` and adds annotations with `prokka`.
+
+```bash
+nextflow run consensus.nf \
+   -profile cluster \
+   --run test_run \
+   -resume
 ```
 
 ### Genome Assembly
@@ -196,5 +208,7 @@ List of dependencies used in the pipeline so far:
 - `any2fasta`
 - `filtlong`
 - `guppy`
+- `medaka`
+- `prokka`
 
 TODO: add tools to automatically install dependencies (e.g. conda environments within nextflow).
