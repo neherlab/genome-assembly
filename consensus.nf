@@ -146,7 +146,7 @@ concatenate_in = medaka_out.map{[
 // concatenates all medakafiles with the same barcode
 process concatenate {
 
-    label 'q30m'
+    label 'q30m_1core'
 
     input:
         tuple val(bc), file("medaka_*.fasta") from concatenate_in
