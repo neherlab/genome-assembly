@@ -86,6 +86,7 @@ partition_out.into { partout_1; partout_2}
 // to be used as input of consensus
 consensus_in = pre_consensus.join(msa_out).join(partout_1)
 
+// executes trycycler consensus and creates 7_final_consensus.fasta
 process consensus {
 
     label 'q30m'
@@ -136,14 +137,14 @@ process polish {
 
 }
 
-// groups medaka files by barcode
+// groups 8_medaka output files by barcode
 concatenate_in = medaka_out.map{[
         "${it[0]}".split('/')[0],
         it[1]
     ]}
     .groupTuple()
 
-// concatenates all medakafiles with the same barcode
+// concatenates all medaka files with the same barcode
 process concatenate {
 
     label 'q30m_1core'
