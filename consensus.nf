@@ -164,7 +164,7 @@ process concatenate {
 // executes prokka on the set of all medaka consensus for one barcode.
 process prokka {
 
-    label 'q6h'
+    label 'q1d'
 
     conda 'conda_envs/prokka_env.yml'
 
@@ -179,6 +179,6 @@ process prokka {
 
     script:
     """
-    prokka --outdir prokka_$bc --prefix ${bc}_genome medaka_consensus.fasta
+    prokka --outdir prokka_$bc --prefix ${bc}_genome --cpus 8 medaka_consensus.fasta
     """
 }
