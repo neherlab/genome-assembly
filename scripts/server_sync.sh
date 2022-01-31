@@ -1,8 +1,8 @@
 USER='d_nanopore'
 SERVER='login.scicore.unibas.ch'
-DEST='/home/qbiodata/nanopore/runs/20170801_cellulose'
+DEST='genome-assembly-pipeline/genome-assembly/runs/2022_01_14_Alex_Sequencing/input'
 # without trailing slash, this will create a directory at destination
-READS='/var/lib/MinKNOW/data/reads'
+READS='/var/lib/minknow/data/2022_01_14_Alex_Sequencing/no_sample/20220114_1326_MN23519_FAL02190_89855126/fast5'
 
 
 while true;
