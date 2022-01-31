@@ -27,8 +27,9 @@ params.use_gpu = false
 
 // path of guppy binaries (cpu or gpu)
 params.guppy_bin_cpu = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
+// params.guppy_bin_cpu = "~/ONT_software/ont-guppy-cpu/bin/guppy_basecaller"
 params.guppy_bin_gpu = "$baseDir/guppy/guppy-cpu/bin/guppy_basecaller"
-
+// params.guppy_bin_gpu = "~/ONT_software/ont-guppy-gpu/bin/guppy_basecaller"
 
 // --------- workflow --------- 
 
