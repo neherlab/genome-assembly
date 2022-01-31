@@ -55,9 +55,10 @@ fast5_ch = fast5_loaded.concat(fast5_watcher)
 // to perform basecalling and barcoding. The output
 // channel collects a list of files in the form
 // .../(barcodeXX|unclassified)/filename.fastq.gz
+params.add_device = params.use_gpu ? '--device auto' : ''
 process basecall {
 
-    label params.use_gpu ? 'gpu_q6h' : 'q6h'
+    label params.use_gpu ? 'gpu_q30m' : 'q6h'
 
     input:
         path fast5_file from fast5_ch
@@ -79,6 +80,8 @@ process basecall {
             --disable_pings \
             --nested_output_folder \
             --trim_barcodes \
+            ${params.add_device} \
+            
         """
 
 }
