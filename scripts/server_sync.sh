@@ -2,12 +2,12 @@ USER='d_nanopore'
 SERVER='login.scicore.unibas.ch'
 DEST='genome-assembly-pipeline/genome-assembly/runs/2022_01_14_Alex_Sequencing/input'
 # without trailing slash, this will create a directory at destination
-READS='/var/lib/minknow/data/2022_01_14_Alex_Sequencing/no_sample/20220114_1326_MN23519_FAL02190_89855126/fast5'
+READS='/var/lib/minknow/data/2022_01_14_Alex_Sequencing/no_sample/20220114_1326_MN23519_FAL02190_89855126/fast5/'
 
 
 while true;
 do
-   rsync -varu --include "*.fast5" --include "*/" --exclude "*" $READS $USER@$SERVER:$DEST
+   rsync -varu --include "*.fast5" --exclude "*" $READS $USER@$SERVER:$DEST
    sleep 300;
 done
 
