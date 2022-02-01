@@ -108,6 +108,11 @@ nextflow run consensus.nf \
    -resume
 ```
 
+Nb: if the computational node has no access to the internet, `medaka` could fail because it cannot download the appropriate model `r941_min_high_g360`. In this case on the login node, where internet is available, one must manually (only once) download the model. This can be done in the following two steps:
+
+1. Activate the conda environment for `medaka`. The environment is created by nextflow and stored in the `work/conda` folder. One can retrieve its location also by running `conda env list`.
+2. Once the corresponding conda environment is activated, the model can be installed by running `medaka tools download_models --models r941_min_high_g360`
+
 ## Folder structure
 
 This is the general idea for the directory structure of the project. Before running the first workflow (or while running it if `set_watcher` is set to true) data should be placed inside the `run_name/input` folder.
