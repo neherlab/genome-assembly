@@ -120,7 +120,7 @@ process concatenate_and_compress {
 // directory to store live statistics on the basecalling
 params.bcstats_dir = file("runs/${params.run}/basecalling_stats")
 
-// if live_stats is set to true
+// if live_stats is set to true, create a file to contain the stats
 if (params.live_stats) {
     // create directory
     params.bcstats_dir.mkdirs()
@@ -129,18 +129,28 @@ if (params.live_stats) {
     bc_stats_file.text = 'len,barcode,time\n'
 }
 
-// Stats input channel: value channel with one file
-bc_stats_in_ch = Channel.fromPath("${params.bcstats_dir}/bc_stats.csv").first()
+// Create the input channel for the stat as a mix of a channel with a single file
+// and the feedback channel
+bc_stats_init = Channel.fromPath("${params.bcstats_dir}/bc_stats.csv")
+feedback_ch = Channel.create()
+bc_stats_in = bc_stats_init.mix( feedback_ch )
 
 // creates a csv file with read length, barcode and timestamp
-// content of the file get appended to the file "basecalling_stats/bc_stats.csv"
+// content of the file get appended to the file "bc_stats.csv"
+// The feedback loop avoids that multiple threads try to append
+// text on the same file.
 process basecalling_live_report {
 
     label 'q30m'
 
+    publishDir params.bcstats_dir, mode: 'copy'
+
     input:
         file('reads_*.fastq.gz') from fastq_tap_ch.collate(50)
-        file('bc_stats.csv') from bc_stats_in_ch
+        file('bc_stats.csv') from bc_stats_in
+
+    output:
+        file('bc_stats.csv') into feedback_ch
 
     when:
         params.live_stats
