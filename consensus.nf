@@ -136,8 +136,10 @@ process polish {
             -o medaka \
             -m r941_min_high_g360 \
             -t 8
-        mv medaka/consensus.fasta 8_medaka.fasta
+        mv medaka/consensus.fasta medaka_temp.fasta
         rm -r medaka
+        echo ">${code}_consensus" > 8_medaka.fasta
+        tail -n +2 medaka_temp.fasta >> 8_medaka.fasta
         """
 
 }
