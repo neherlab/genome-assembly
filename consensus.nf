@@ -114,7 +114,7 @@ medaka_in = partout_2.join(consensus_out)
 // polish using medaka. Creates a 8_medaka.fasta file
 process polish {
 
-    label 'q1d'
+    label 'q30m'
 
     conda 'conda_envs/medaka_env.yml'
 
@@ -129,25 +129,13 @@ process polish {
         tuple val(code), file("8_medaka.fasta") into medaka_out
 
     script:
-    if ( workflow.profile == 'cluster')
-        '''
-        mv 4_reads.fastq 7_final_consensus.fasta $TMPDIR/
-        medaka_consensus \
-            -i $TMPDIR/4_reads.fastq \
-            -d $TMPDIR/7_final_consensus.fasta \
-            -o $TMPDIR/medaka \
-            -m r941_min_high_g360 \
-            -t 8
-        mv $TMPDIR/medaka/consensus.fasta 8_medaka.fasta
-        '''
-    else
         """
         medaka_consensus \
             -i 4_reads.fastq \
             -d 7_final_consensus.fasta \
             -o medaka \
             -m r941_min_high_g360 \
-            -t 8
+            -t 16
         mv medaka/consensus.fasta 8_medaka.fasta
         rm -r medaka
         """
@@ -182,7 +170,7 @@ process concatenate {
 // executes prokka on the set of all medaka consensus for one barcode.
 process prokka {
 
-    label 'q1d'
+    label 'q30m'
 
     conda 'conda_envs/prokka_env.yml'
 
