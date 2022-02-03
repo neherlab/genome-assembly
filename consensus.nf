@@ -135,7 +135,7 @@ process polish {
             -d 7_final_consensus.fasta \
             -o medaka \
             -m r941_min_high_g360 \
-            -t 16
+            -t 8
         mv medaka/consensus.fasta 8_medaka.fasta
         rm -r medaka
         """
