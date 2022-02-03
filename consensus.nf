@@ -109,7 +109,7 @@ process consensus {
 }
 
 // join 7_final_consensus and 4_reads in a single channel
-medaka_in = consensus_out.join(partout_2)
+medaka_in = partout_2.join(consensus_out)
 
 // polish using medaka. Creates a 8_medaka.fasta file
 process polish {
@@ -123,7 +123,7 @@ process polish {
         pattern : "8_medaka.fasta"
 
     input:
-        tuple val(code), "4_reads.fastq", "7_final_consensus.fasta" from medaka_in
+        tuple val(code), file(reads), file(consensus) from medaka_in
 
     output:
         tuple val(code), file("8_medaka.fasta") into medaka_out
