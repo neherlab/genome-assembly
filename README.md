@@ -30,7 +30,7 @@ The test dataset for basecalling was created by subsampling `.fast5` files from 
 Example of pipeline execution command and options
 
 ```bash
-netflow run basecall.nf \
+nextflow run basecall.nf \
     -resume \
     -profile cluster \
     --set_watcher false \
