@@ -46,7 +46,7 @@ fastq_filtered_ch.into { to_subsampler ; to_clustering }
 // subsamble the reads in 12 samples
 process subsampler {
 
-    label 'q30m'
+    label 'q30m_highmem'
 
     errorStrategy 'ignore'
 
