@@ -62,6 +62,7 @@ process subsampler {
         trycycler subsample \
             --reads reads.fastq \
             --out_dir ${bc} \
+            --threads 16 \
             # --min_read_depth 1
         """
 }
