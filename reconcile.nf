@@ -37,7 +37,7 @@ cluster_ch = barcodes_ch
 //   in the main directory, to have a summary of which contigs failed to reconcile.
 process reconcile {
 
-    label 'q30m'
+    label 'q30m_highmem'
 
     publishDir "$params.input_dir/$bc/$cl",
         mode: 'copy',
