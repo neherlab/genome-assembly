@@ -156,7 +156,7 @@ process trycycler_cluster {
 
     label 'q30m'
 
-    publishDir params.trycyler_dir, mode: 'move'
+    publishDir params.trycyler_dir, mode: 'copy'
 
     input:
         tuple val(barcode), file("assemblies_*.fasta"), file("reads.fastq") from assembled_ch
