@@ -10,7 +10,6 @@ import pathlib
 import os
 import re
 import datetime
-from shutil import ExecError
 import subprocess
 import numpy as np
 import pandas as pd
@@ -168,6 +167,7 @@ def single_experiment_readme(subdir, df_row):
     rdm_file = subdir / "README.txt"
     with open(rdm_file, "w") as f:
         f.write("\n".join(message))
+    make_read_only([str(rdm_file)])
 
 
 def lock_file(f):
@@ -191,6 +191,13 @@ def unlock_file(f):
     lock_f = pathlib.Path(str(f) + ".lock")
     assert lock_f.is_file(), "Lock file missing"
     os.remove(lock_f)
+
+
+def copy_prokka_data(prokka_src, prokka_dest):
+    for f in prokka_src.glob("barcode*_genome.*"):
+        new_file = prokka_dest / f"assembly{f.suffix}"
+        run_command(["cp", str(f), str(new_file)])
+        make_read_only([new_file])
 
 
 if __name__ == "__main__":
@@ -269,7 +276,7 @@ if __name__ == "__main__":
     # -------------- archive fast5 files ---------------------
 
     # name for fast5 files storage folder
-    flow_id = df["flowcell_run_id"][0]
+    flow_id = df["flowcell_run_id"].iloc[0]
     today = datetime.date.today().isoformat()
     flow_run_tag = f"{today}_{flow_id}"
     archive_fld = raw_main_dir / flow_run_tag
@@ -362,6 +369,19 @@ if __name__ == "__main__":
 
             single_experiment_readme(exp_subdir, row)
 
+            # if present, copy the prokka folder
+            prokka_fld_src = (
+                data_fld
+                / "clustering"
+                / f"barcode{int(bc):02d}"
+                / f"prokka_barcode{int(bc):02d}"
+            )
+            if prokka_fld_src.is_dir():
+                print("copying prokka assembly")
+                prokka_dest = exp_subdir / "prokka_assembly"
+                prokka_dest.mkdir()
+                copy_prokka_data(prokka_fld_src, prokka_dest)
+
         # check if sample.csv already exists, if so merge and overwrite
         sample_info = exp_dir / "sample.csv"
         if sample_info.is_file():
@@ -378,5 +398,3 @@ if __name__ == "__main__":
 
         # making the file read-only
         run_command(["chmod", "444", str(sample_info)])
-
-    # TODO: transfer prokka folder (which files?) if existing
