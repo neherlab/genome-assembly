@@ -1,9 +1,5 @@
-# Script to archive data in the group folder, organized by experiment, vial and sampling
-# time-point. It takes as argument a csv table
+# Script to archive data in the group folder. See the corresponding README file for details on usage.
 
-# TODO: archive csv file with addition of experiment id and flowcell sequencing sample id.
-# TODO: create destination folder if it does not exist
-# TODO: change permissions to read-only
 
 import argparse
 import pathlib
