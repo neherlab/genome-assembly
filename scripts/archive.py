@@ -15,8 +15,8 @@ import numpy as np
 import pandas as pd
 import time
 
-# dest = pathlib.Path("~/GROUP/data/2022_nanopore_sequencing/")
-dest = pathlib.Path("archive")
+dest = pathlib.Path("/scicore/home/neher/GROUP/data/2022_nanopore_sequencing")
+# dest = pathlib.Path("archive")
 raw_main_dir = dest / "raw"
 bc_main_dir = dest / "basecalled"
 exp_main_dir = dest / "experiments"
