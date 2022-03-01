@@ -118,7 +118,7 @@ def run_command(command):
     else:
         stdout = subp.stdout.decode()
         if len(stdout) > 0:
-            print(stout)
+            print(stdout)
 
 
 def create_fast5_archive(archive_fld, fast5_fld):
