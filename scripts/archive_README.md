@@ -4,9 +4,9 @@
 
 This file is used to archive data in the group folder after basecalling (and genome assembly). It performs the follwing functions:
 
-- archive raw `.fast5` files in the `raw` destination folder in compressed format.
+- archive raw `.fast5` files in a tar file in the `raw` destination folder.
 - archive basecalled reads in the `basecalled` folder, in `fastq.gz` format.
-- archive a symlink to the same data in the `experiments` folder, where data are organized based on experiment run, vial and sampling time-point.  
+- archive a symlink to the same data in the `experiments` folder, where data are organized based on experiment run, vial and sampling time-point. Archive also assembled genomes if present. 
 
 
 ## Structure of data storage
@@ -15,7 +15,7 @@ This file is used to archive data in the group folder after basecalling (and gen
 
 The `raw` folder contains the raw `.fast5` files. Each different subfolder corresponds to a different nanopore sequencing run, with a name in the form `date_run-id` (e.g. `2022-03-01_FAL13933_18713141`). The date in this case is the _archiviation_ date, not the date of the experiment. This is done because in principle in the same sequencing run one might sequence data for different runs of the experiment. The run id is instead the prefix given to the `.fast5` files by nanopore. It includes the flowcell id and the id of the sequencing run, and is unique for each sequencing run.
 Each of these subfolders contains:
-- `fast5_reads.tar.gz`: gzipped archive containing all of the fast5 files.
+- `fast5_reads.tar`: archive containing all of the fast5 files.
 - `sample.csv`: a table containing information on how data for different barcodes is related to different experiments. For each barcode it is indicated the experiment id, the experiment date, the vial and timepoint of sampling, and also the sequencing run id which is the same for all the samples.
 
 
