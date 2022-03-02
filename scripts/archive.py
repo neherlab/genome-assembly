@@ -101,8 +101,8 @@ def filter_dataframe(df):
     return df
 
 
-def run_command(command):
-    """Utility function to run a shell command and visualize output."""
+def run_command(command, verbose=False):
+    """Utility function to run a shell command and optionally visualize output."""
     subp = subprocess.run(command, capture_output=True)
     if subp.returncode:
         print(f"Error: return code {subp.returncode}")
@@ -110,9 +110,10 @@ def run_command(command):
         print(subp.stderr.decode())
         raise RuntimeError(f"command {' '.join(command)} failed")
     else:
-        stdout = subp.stdout.decode()
-        if len(stdout) > 0:
-            print(stdout)
+        if verbose:
+            stdout = subp.stdout.decode()
+            if len(stdout) > 0:
+                print(stdout)
 
 
 def create_fast5_archive(archive_fld, fast5_fld):
@@ -355,7 +356,6 @@ if __name__ == "__main__":
     # transfer fastq reads to basecalled folder
     fastq_from_fld = data_fld / "basecalled"
     print(f"copy selected barcodes from {fastq_from_fld} to {fastq_to_fld}")
-    print(f"copy selected barcodes from {fastq_from_fld} to {fastq_to_fld}")
     fastq_to_files = {}  # dictionary with files destinations
     for bc in df.barcode.values:
         print(f"processing barcode {bc}")
@@ -365,9 +365,9 @@ if __name__ == "__main__":
         # copy fastq files
         run_command(["cp", str(fastq_from_file), str(fastq_to_files[bc])])
 
-    print(f"adding table {sample_info_file}")
     sample_info_file = fastq_to_fld / "sample.csv"
-    df.to_csv(sample_info_file)
+    print(f"creating info table {sample_info_file}")
+    df.to_csv(sample_info_file, index=False)
 
     # change file permissions
     readonly_files = [str(f) for f in fastq_to_files.values()] + [str(sample_info_file)]
