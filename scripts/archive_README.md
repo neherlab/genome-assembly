@@ -32,7 +32,7 @@ The `experiments` folder contains symlinks to the basecalled reads, but with a f
 Inside the last layer of directories the following files are present:
 - `reads.fastq.gz`: symlink to the corresponding gzipped fastq file in the `basecalled` folder
 - `README.txt`: a readme file with information on the experimental conditions and the sequecning run that produced the data.
-- `assembly`
+- `assembled_genome`: (optional) if the reads were transformed in an assembled and annotated genome, then the result is saved in this folder.
 
 
 ## Script usage
