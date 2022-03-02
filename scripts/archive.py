@@ -166,7 +166,7 @@ def single_experiment_readme(subdir, df_row, git_id):
         "annotation was performed with the workflow present in the same repository.",
         "This assembly pipeline is based on trycycler (https://github.com/rrwick/Trycycler)",
         "And annotation was done using Prokka (https://github.com/tseemann/prokka).",
-        "For reproducibility, the log of trycicler reconcile command is also saved.",
+        "For reproducibility, the log of trycycler reconcile command is also saved.",
         "This contains information on which contigs were included in the assembly.",
     ]
     rdm_file = subdir / "README.txt"
