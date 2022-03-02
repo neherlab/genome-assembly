@@ -455,7 +455,7 @@ if __name__ == "__main__":
             print(f"appending to table {sample_info}")
             lock_file(sample_info)
             old_df = pd.read_csv(sample_info, **read_sample_info_kwargs)
-            new_df = pd.concat([sdf, old_df], ignore_index=True)
+            new_df = pd.concat([old_df, sdf], ignore_index=True)
             run_command(["chmod", "666", str(sample_info)])
             new_df.to_csv(sample_info, index=False)
             unlock_file(sample_info)
