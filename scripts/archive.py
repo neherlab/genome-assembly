@@ -109,7 +109,7 @@ def run_command(command):
         print(f"Error: return code {subp.returncode}")
         print("message:")
         print(subp.stderr.decode())
-        raise ExecError(f"command {' '.join(command)} failed")
+        raise RuntimeError(f"command {' '.join(command)} failed")
     else:
         stdout = subp.stdout.decode()
         if len(stdout) > 0:
@@ -179,7 +179,7 @@ def lock_file(f):
             with open(lock_f, "w") as lf:
                 lf.write(f"lock file created on {datetime.date.today().isoformat()}")
             return True
-    raise ExecError(f"maximum waiting time exceeded when trying to lock {f}")
+    raise RuntimeError(f"maximum waiting time exceeded when trying to lock {f}")
 
 
 def unlock_file(f):
@@ -317,7 +317,7 @@ if __name__ == "__main__":
     for bc in df.barcode.values:
         print(f"processing barcode {bc}")
         fastq_from_file = fastq_from_fld / f"barcode{int(bc):02d}.fastq.gz"
-        assert fastq_from_file.is_file(), f"file {fastq_from[bc]} does not exist."
+        assert fastq_from_file.is_file(), f"file {fastq_from_file} does not exist."
         fastq_to_files[bc] = fastq_to_fld / f"barcode{int(bc):02d}.fastq.gz"
         # copy fastq files
         run_command(["cp", str(fastq_from_file), str(fastq_to_files[bc])])
