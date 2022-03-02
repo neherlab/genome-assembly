@@ -306,7 +306,7 @@ if __name__ == "__main__":
         exit(0)
 
     # if the csv file exists then load it and check if it is valid
-    read_sample_info_kwargs = {"dtype": {"barcode": int, "vial": int, "timepoint": str}}
+    read_sample_info_kwargs = {"dtype": {"barcode": int, "vial": str, "timepoint": str}}
     df = pd.read_csv(sample_info_file, **read_sample_info_kwargs)
     print(df)
     check_valid(df)
