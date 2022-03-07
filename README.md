@@ -58,6 +58,12 @@ The options have the following meaning:
 
 Other options that can be specified include `--flowcell`, `--kit` and `--barcode_kits`.
 
+### Ending the basecalling script:
+
+Create a file named `end-signal.fast5` in the local `READS` folder of the watcher script. This will terminate the nextflow process.
+
+The upload script can be terminated using `Ctrl-C` or `Ctrl-D`.
+
 #### Visualizing basecalling statistics
 
 The script `basecall_stats.py` can be used to generate figures to analyze general basecalling statistics, such as read length distribution and number of reads. Usage is as follows:
