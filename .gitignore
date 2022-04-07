@@ -1,6 +1,6 @@
 /.nextflow*
 /work
-/guppy
+/guppy_bin
 /runs/*
 /reports
 /scripts/ignored/
